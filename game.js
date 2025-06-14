@@ -102,7 +102,7 @@ async function showRanking() {
   snapshot.forEach((doc, i) => {
     const d = doc.data();
     const li = document.createElement("li");
-    li.textContent = `${i + 1}. ${d.name} - ${d.score}`;
+    li.textContent = `${i + 1}. ${d.name || "익명"} - ${d.score}`;
     list.appendChild(li);
   });
 }
@@ -300,7 +300,7 @@ document.addEventListener("keyup", e => {
 
 document.addEventListener("keydown", e => {
   if ((e.code === "Space" || e.code === "ArrowUp") && swan.jumpCount < 2 && !swan.ducking) {
-    swan.vy = -420;
+    swan.vy = -500;
     swan.jumping = true;
     swan.jumpCount++;
     jumpSound.play();
