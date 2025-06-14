@@ -102,7 +102,7 @@ async function showRanking() {
   snapshot.forEach((doc, i) => {
     const d = doc.data();
     const li = document.createElement("li");
-    li.textContent = `${i + 1}. ${d.name || "익명"} - ${d.score}`;
+    li.textContent = `${(i + 1).toString()}. ${d.name || "익명"} - ${d.score}`;
     list.appendChild(li);
   });
 }
