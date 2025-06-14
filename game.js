@@ -160,8 +160,10 @@ function drawStartText() {
   ctx.fillStyle = "black";
   ctx.font = "20px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("스페이스바 또는 ↑키를 눌러 시작하세요", canvas.width / 2, canvas.height / 2 - 10);
-  ctx.fillText("제작: madswanattack", canvas.width / 2, canvas.height / 2 + 20);
+  ctx.fillText("스페이스바/↑ 또는 화면 터치 → 점프", canvas.width / 2, canvas.height / 2 - 30);
+  ctx.fillText("↓ 또는 화면 아래로 스와이프 → 수그리기", canvas.width / 2, canvas.height / 2);
+  ctx.fillText("BGM: 왼쪽 위 텍스트를 클릭하면 on/off 전환", canvas.width / 2, canvas.height / 2 + 30);
+  ctx.fillText("제작: madswanattack", canvas.width / 2, canvas.height / 2 + 60);
 }
 
 function drawCreditTag() {
@@ -176,6 +178,18 @@ function drawBGMStatus() {
   ctx.font = "9px Arial";
   ctx.textAlign = "left";
   ctx.fillText(`BGM: ${bgmOn ? "ON" : "OFF"} (M 키)`, 5, 12);
+
+  // 모바일 클릭 영역
+  canvas.addEventListener("click", function handleClick(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x >= 0 && x <= 100 && y >= 0 && y <= 20) {
+      bgmOn = !bgmOn;
+      if (bgmOn && gameStarted) bgm.play();
+      else bgm.pause();
+    }
+  }, { once: true });
 }
 
 function gameLoop(timestamp) {
@@ -317,6 +331,38 @@ document.addEventListener("keydown", e => {
 });
 
 window.onload = () => {
+  const touchZone = document.getElementById("gameCanvas");
+  let touchStartY = null;
+
+  touchZone.addEventListener("touchstart", e => {
+    if (!gameStarted) {
+      resetGame();
+    } else {
+      touchStartY = e.touches[0].clientY;
+    }
+  });
+
+  touchZone.addEventListener("touchend", e => {
+    if (!gameStarted) return;
+    if (touchStartY === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const swipeDistance = touchEndY - touchStartY;
+
+    if (swipeDistance > 50 && !swan.jumping) {
+      // Swipe down - duck
+      swan.ducking = true;
+      duckSound.play();
+    } else {
+      // Tap or swipe up - jump
+      if (swan.jumpCount < 2 && !swan.ducking) {
+        swan.vy = -480;
+        swan.jumping = true;
+        swan.jumpCount++;
+        jumpSound.play();
+      }
+    }
+    touchStartY = null;
+  });
   showRanking();
   requestAnimationFrame(gameLoop);
 };
