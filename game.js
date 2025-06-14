@@ -68,12 +68,14 @@ let swan = {
 let obstacles = [];
 let score = 0;
 let speed = 5;
+let maxSpeed = 13;
 let bgX = 0;
 let groundX = 0;
 let invertBackground = false;
 let obstacleFrequency = 90;
 let lastTime = null;
 let obstacleCooldown = 0;
+let timeSinceStart = 0;
 
 // ===== 점수 저장 및 명예의 전당 =====
 async function saveScore(nickname, score) {
@@ -148,7 +150,7 @@ function isColliding(a, b) {
 
 function resetGame() {
   swan.y = 120; swan.vy = 0; swan.jumping = false; swan.ducking = false; swan.jumpCount = 0;
-  obstacles = []; score = 0; speed = 5; obstacleFrequency = 90;
+  obstacles = []; score = 0; speed = 5; obstacleFrequency = 90; timeSinceStart = 0;
   gameStarted = true; gameOver = false; invertBackground = false;
   document.body.style.filter = "none";
   if (bgmOn) { bgm.currentTime = 0; bgm.play(); }
@@ -180,11 +182,17 @@ function gameLoop(timestamp) {
   if (!lastTime) lastTime = timestamp;
   const delta = (timestamp - lastTime) / 1000;
   lastTime = timestamp;
+  timeSinceStart += delta;
+
+  if (gameStarted && speed < maxSpeed) {
+    speed += delta * 0.2;
+    if (speed > maxSpeed) speed = maxSpeed;
+  }
+
   const movement = speed * delta * 60;
   obstacleCooldown -= delta;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   bgX -= gameStarted ? movement * 0.3 : 0;
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(bgImg, bgX, 0, canvas.width, 150);
@@ -251,14 +259,6 @@ function gameLoop(timestamp) {
       invertBackground = !invertBackground;
       document.body.style.transition = "filter 1s ease";
       document.body.style.filter = invertBackground ? "invert(100%)" : "none";
-    }
-
-    if (Math.floor(score) % 300 === 0 && Math.floor(score) !== 0) {
-      speed += 0.1;
-    }
-
-    if (Math.floor(score) % 1000 === 0 && Math.floor(score) !== 0) {
-      obstacleFrequency = Math.max(60, obstacleFrequency - 5);
     }
   }
 
