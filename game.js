@@ -300,7 +300,7 @@ document.addEventListener("keyup", e => {
 
 document.addEventListener("keydown", e => {
   if ((e.code === "Space" || e.code === "ArrowUp") && swan.jumpCount < 2 && !swan.ducking) {
-    swan.vy = -500;
+    swan.vy = -480;
     swan.jumping = true;
     swan.jumpCount++;
     jumpSound.play();
