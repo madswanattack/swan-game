@@ -176,6 +176,8 @@ function drawBGMStatus() {
 }
 
 function gameLoop() {
+  console.log("[DEBUG] current speed:", speed);
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   bgX -= gameStarted ? speed * 0.3 : 0;
   if (bgX <= -canvas.width) bgX = 0;
