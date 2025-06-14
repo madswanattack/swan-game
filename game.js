@@ -68,7 +68,7 @@ let swan = {
 let obstacles = [];
 let score = 0;
 let speed = 5;
-let maxSpeed = 13;
+let maxSpeed = 15;
 let bgX = 0;
 let groundX = 0;
 let invertBackground = false;
@@ -209,7 +209,7 @@ function gameLoop(timestamp) {
   ctx.drawImage(swanImg, swan.x, swan.y, swan.width, swan.height);
 
   if (gameStarted) {
-    swan.vy += 1260 * delta;
+    swan.vy += 1400 * delta;
     swan.y += swan.vy * delta;
     if (swan.y >= 120) {
       swan.y = 120; swan.vy = 0; swan.jumping = false; swan.jumpCount = 0;
@@ -259,6 +259,7 @@ function gameLoop(timestamp) {
       invertBackground = !invertBackground;
       document.body.style.transition = "filter 1s ease";
       document.body.style.filter = invertBackground ? "invert(100%)" : "none";
+      obstacleFrequency = Math.max(40, obstacleFrequency - 5); // 장애물 빈도 증가
     }
   }
 
