@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>백조 달리기 게임</title>
+  <style>
+    body {
+      background-color: #cefff3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    canvas {
+      border: 2px solid black;
+      background-color: white;
+    }
+    #ranking {
+      margin-top: 30px;
+      max-width: 400px;
+      width: 90%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    #ranking h2 {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    #rankingList {
+      padding-left: 20px;
+    }
+    #rankingList li {
+      margin: 4px 0;
+    }
+  </style>
+
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCy9E1PE3p3pE5-xCwwc5tgFI5AGu4HgOk",
+    authDomain: "swan-game-rankboard.firebaseapp.com",
+    projectId: "swan-game-rankboard",
+    storageBucket: "swan-game-rankboard.appspot.com",
+    messagingSenderId: "307505465860",
+    appId: "1:307505465860:web:ebea046e651ab4fd780351"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window.db = db;
+</script>
+
+
+<body>
+  <canvas id="gameCanvas" width="800" height="200"></canvas>
+
+  <!-- 🏆 명예의 전당 -->
+  <div id="ranking">
+    <h2>🏆 명예의 전당</h2>
+    <ol id="rankingList"></ol>
+  </div>
+
+<script type="module" src="game.js"></script>
+</body>
+</html>
