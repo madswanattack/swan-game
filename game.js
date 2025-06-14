@@ -203,7 +203,12 @@ function gameLoop(timestamp) {
   ctx.drawImage(groundImg, groundX, 150, canvas.width, 30);
   ctx.drawImage(groundImg, groundX + canvas.width, 150, canvas.width, 30);
 
-  if (gameStarted && Math.floor(timestamp / 100) % 10 === 0) swan.frame = (swan.frame + 1) % 2;
+  if (gameStarted) {
+    const animSpeed = 10 - Math.floor(speed); // 속도가 빠를수록 애니메이션 더 빨리
+    if (Math.floor(timestamp / (100 * animSpeed)) % 2 === 0) {
+      swan.frame = (swan.frame + 1) % 2;
+    }
+  }
   let currentFrame = swan.ducking ? duckFrames[swan.frame] : swanFrames[swan.frame];
   swanImg.src = currentFrame;
   ctx.drawImage(swanImg, swan.x, swan.y, swan.width, swan.height);
