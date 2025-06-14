@@ -185,7 +185,7 @@ function gameLoop(timestamp) {
   timeSinceStart += delta;
 
   if (gameStarted && speed < maxSpeed) {
-    speed += delta * 0.2;
+    speed += delta * 0.1;
     if (speed > maxSpeed) speed = maxSpeed;
   }
 
