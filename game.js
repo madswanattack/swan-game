@@ -201,7 +201,7 @@ function gameLoop(timestamp) {
   ctx.drawImage(swanImg, swan.x, swan.y, swan.width, swan.height);
 
   if (gameStarted) {
-    swan.vy += 800 * delta;
+    swan.vy += 1200 * delta;
     swan.y += swan.vy * delta;
     if (swan.y >= 120) {
       swan.y = 120; swan.vy = 0; swan.jumping = false; swan.jumpCount = 0;
@@ -300,7 +300,7 @@ document.addEventListener("keyup", e => {
 
 document.addEventListener("keydown", e => {
   if ((e.code === "Space" || e.code === "ArrowUp") && swan.jumpCount < 2 && !swan.ducking) {
-    swan.vy = -400;
+    swan.vy = -600;
     swan.jumping = true;
     swan.jumpCount++;
     jumpSound.play();
