@@ -73,6 +73,7 @@ let groundX = 0;
 let invertBackground = false;
 let obstacleFrequency = 90;
 let lastTime = null;
+let obstacleCooldown = 0;
 
 // ===== 점수 저장 및 명예의 전당 =====
 async function saveScore(nickname, score) {
@@ -180,6 +181,7 @@ function gameLoop(timestamp) {
   const delta = (timestamp - lastTime) / 1000;
   lastTime = timestamp;
   const movement = speed * delta * 60;
+  obstacleCooldown -= delta;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -199,13 +201,13 @@ function gameLoop(timestamp) {
   ctx.drawImage(swanImg, swan.x, swan.y, swan.width, swan.height);
 
   if (gameStarted) {
-    swan.vy += 500 * delta;
+    swan.vy += 800 * delta;
     swan.y += swan.vy * delta;
     if (swan.y >= 120) {
       swan.y = 120; swan.vy = 0; swan.jumping = false; swan.jumpCount = 0;
     }
 
-    if (Math.floor(timestamp / 1000 * 60) % obstacleFrequency === 0) {
+    if (obstacleCooldown <= 0) {
       const isBird = Math.random() < 0.3;
       if (isBird) {
         const bird = { type: "bird", x: canvas.width, y: Math.random() < 0.5 ? 90 : 50, width: 75, height: 50, frame: 0 };
@@ -216,6 +218,7 @@ function gameLoop(timestamp) {
         const plant = { type: "plant", x: canvas.width, y: 120 + (swan.height - h), width: w, height: h, img: loadImage(src) };
         obstacles.push(plant);
       }
+      obstacleCooldown = 1.2;
     }
 
     for (let ob of obstacles) {
@@ -228,6 +231,7 @@ function gameLoop(timestamp) {
         ctx.drawImage(ob.img, ob.x, ob.y, ob.width, ob.height);
       }
     }
+
     obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
 
     const swanBox = getSwanHitbox();
@@ -296,7 +300,7 @@ document.addEventListener("keyup", e => {
 
 document.addEventListener("keydown", e => {
   if ((e.code === "Space" || e.code === "ArrowUp") && swan.jumpCount < 2 && !swan.ducking) {
-    swan.vy = -400; // 점프 높이
+    swan.vy = -400;
     swan.jumping = true;
     swan.jumpCount++;
     jumpSound.play();
