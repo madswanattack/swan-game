@@ -68,11 +68,11 @@ let swan = {
 let obstacles = [];
 let score = 0;
 let speed = 5;
-let frameCount = 0;
 let bgX = 0;
 let groundX = 0;
 let invertBackground = false;
 let obstacleFrequency = 90;
+let lastTime = null;
 
 // ===== 점수 저장 및 명예의 전당 =====
 async function saveScore(nickname, score) {
@@ -147,7 +147,7 @@ function isColliding(a, b) {
 
 function resetGame() {
   swan.y = 120; swan.vy = 0; swan.jumping = false; swan.ducking = false; swan.jumpCount = 0;
-  obstacles = []; score = 0; speed = 5; frameCount = 0; obstacleFrequency = 90;
+  obstacles = []; score = 0; speed = 5; obstacleFrequency = 90;
   gameStarted = true; gameOver = false; invertBackground = false;
   document.body.style.filter = "none";
   if (bgmOn) { bgm.currentTime = 0; bgm.play(); }
@@ -175,31 +175,37 @@ function drawBGMStatus() {
   ctx.fillText(`BGM: ${bgmOn ? "ON" : "OFF"} (M 키)`, 5, 12);
 }
 
-function gameLoop() {
-  console.log("[DEBUG] current speed:", speed);
+function gameLoop(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const delta = (timestamp - lastTime) / 1000;
+  lastTime = timestamp;
+  const movement = speed * delta * 60;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  bgX -= gameStarted ? speed * 0.3 : 0;
+
+  bgX -= gameStarted ? movement * 0.3 : 0;
   if (bgX <= -canvas.width) bgX = 0;
   ctx.drawImage(bgImg, bgX, 0, canvas.width, 150);
   ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, 150);
-  groundX -= gameStarted ? speed : 0;
+
+  groundX -= gameStarted ? movement : 0;
   if (groundX <= -canvas.width) groundX = 0;
   ctx.drawImage(groundImg, groundX, 150, canvas.width, 30);
   ctx.drawImage(groundImg, groundX + canvas.width, 150, canvas.width, 30);
-  if (gameStarted && frameCount % 10 === 0) swan.frame = (swan.frame + 1) % 2;
+
+  if (gameStarted && Math.floor(timestamp / 100) % 10 === 0) swan.frame = (swan.frame + 1) % 2;
   let currentFrame = swan.ducking ? duckFrames[swan.frame] : swanFrames[swan.frame];
   swanImg.src = currentFrame;
   ctx.drawImage(swanImg, swan.x, swan.y, swan.width, swan.height);
 
   if (gameStarted) {
-    swan.vy += 0.5;
-    swan.y += swan.vy;
+    swan.vy += 500 * delta;
+    swan.y += swan.vy * delta;
     if (swan.y >= 120) {
       swan.y = 120; swan.vy = 0; swan.jumping = false; swan.jumpCount = 0;
     }
 
-    if (frameCount % obstacleFrequency === 0) {
+    if (Math.floor(timestamp / 1000 * 60) % obstacleFrequency === 0) {
       const isBird = Math.random() < 0.3;
       if (isBird) {
         const bird = { type: "bird", x: canvas.width, y: Math.random() < 0.5 ? 90 : 50, width: 75, height: 50, frame: 0 };
@@ -213,9 +219,9 @@ function gameLoop() {
     }
 
     for (let ob of obstacles) {
-      ob.x -= speed;
+      ob.x -= movement;
       if (ob.type === "bird") {
-        ob.frame = Math.floor(frameCount / 10) % 2;
+        ob.frame = Math.floor(timestamp / 100) % 2;
         const img = loadImage(birdFrames[ob.frame]);
         ctx.drawImage(img, ob.x, ob.y, ob.width, ob.height);
       } else {
@@ -235,19 +241,19 @@ function gameLoop() {
       }
     }
 
-    score += 0.1;
+    score += delta * 6;
 
-    if (Math.floor(score) % 750 === 0 && Math.floor(score) !== 0 && frameCount % 60 === 0) {
+    if (Math.floor(score) % 750 === 0 && Math.floor(score) !== 0) {
       invertBackground = !invertBackground;
       document.body.style.transition = "filter 1s ease";
       document.body.style.filter = invertBackground ? "invert(100%)" : "none";
     }
 
-    if (frameCount % 300 === 0) {
+    if (Math.floor(score) % 300 === 0 && Math.floor(score) !== 0) {
       speed += 0.1;
     }
 
-    if (Math.floor(score) % 1000 === 0 && Math.floor(score) !== 0 && frameCount % 60 === 0) {
+    if (Math.floor(score) % 1000 === 0 && Math.floor(score) !== 0) {
       obstacleFrequency = Math.max(60, obstacleFrequency - 5);
     }
   }
@@ -270,7 +276,7 @@ function gameLoop() {
   drawBGMStatus();
   drawCreditTag();
   if (!gameStarted) drawStartText();
-  frameCount++;
+
   requestAnimationFrame(gameLoop);
 }
 
@@ -290,7 +296,7 @@ document.addEventListener("keyup", e => {
 
 document.addEventListener("keydown", e => {
   if ((e.code === "Space" || e.code === "ArrowUp") && swan.jumpCount < 2 && !swan.ducking) {
-    swan.vy = -9;
+    swan.vy = -400; // 점프 높이
     swan.jumping = true;
     swan.jumpCount++;
     jumpSound.play();
@@ -300,8 +306,7 @@ document.addEventListener("keydown", e => {
   }
 });
 
-// ✅ 루프는 단 1번만 실행
 window.onload = () => {
   showRanking();
-  gameLoop();
+  requestAnimationFrame(gameLoop);
 };
